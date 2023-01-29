@@ -27,7 +27,7 @@ function removeFavoriteCity(req, res) {
 
 function addFavoriteCity(req, res) {
     try {
-        var city = req.body
+        const city = req.body
         favoriteCityService.addToFavorites(city)
             .then(city => res.send(city))
     } catch (err) {

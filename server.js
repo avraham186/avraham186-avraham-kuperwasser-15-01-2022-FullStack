@@ -20,7 +20,7 @@ const { getCurrentWeather } = require('./api/weather/weatherController')
 const { createDatabase } = require('./services/DBService')
 
 
-app.get('/createDatabase', createDatabase)
+// app.get('/createDatabase', createDatabase)
 
 app.use('/api/favorite', favoriteCityRoutes)
 app.get('/api/Search', searchAutoComplete)

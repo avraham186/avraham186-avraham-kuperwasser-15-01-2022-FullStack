@@ -1,51 +1,62 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 const connection = mysql.createConnection({
     host: 'localhost',
     port: 3307,
     user: 'root',
     password: 'admin',
-    database: 'weather_DB',//if there is no DB comment this line and send create database request, after the DB created uncomment this line
     insecureAuth: true
 });
 
-    connection.connect(err => {
-        if (err) throw new Error('mySql failed connection',err);
-        console.log('connected to SQL server');
-    })
+connection.connect((err) => {
+    if (err) throw new Error('mySql failed connection', err);
+    console.log('connected to SQL server');
+    const query = 'SELECT count(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = "weather_DB"'
+    connection.query(query, (err, rows) => {
+        const isDBExist = Object.values(JSON.parse(JSON.stringify(rows[0])))[0]
+        if (isDBExist === 1) {
+            const useQuery = 'USE weather_DB';
+            connection.query(useQuery, (error) => {
+                if (error) throw error;
+                console.log("Using Database weather_DB");
+            })
+        } else {
+            createDataBase()
+        }
+    });
+})
 
 
-function runSQL(sqlCommand) {
+function runSQL(sqlCommand,varArr) {
     return new Promise((resolve, reject) => {
-        connection.query(sqlCommand, function (error, results, fields) {
+        connection.execute(sqlCommand,varArr, function (error, results, fields) {
             if (error) reject(error);
             else resolve(results);
         });
     })
 }
+// function runSQL(sqlCommand) {
+//     return new Promise((resolve, reject) => {
+//         connection.query(sqlCommand, function (error, results, fields) {
+//             if (error) reject(error);
+//             else resolve(results);
+//         });
+//     })
+// }
 
-
-//create database
-const createDatabase = () => {
-    const connection = mysql.createConnection({
-        host: 'localhost',
-        port: 3307,
-        user: 'root',
-        password: 'admin',
-        insecureAuth: true
-    });
+function createDataBase() {
     const databaseName = "weather_DB";
-    const createQuery = `CREATE DATABASE ${databaseName}`;
+    const query = `CREATE DATABASE ${databaseName}`
 
-    connection.query(createQuery, (err) => {
+    connection.query(query, (err) => {
         if (err) throw err;
-
         console.log("Database Created Successfully !");
 
         const useQuery = `USE ${databaseName}`;
         connection.query(useQuery, (error) => {
             if (error) throw error;
-            console.log("Using Database");
+            console.log(`Using Database ${databaseName}`);
+
             const tables = [
                 { name: 'cities', columns: ['id', 'weatherTxt', 'temp'] },
                 { name: 'favorite_cities', columns: ['cityKey', 'localizedName'] }
@@ -64,13 +75,12 @@ const createDatabase = () => {
                     )
                 }
             })
-            return console.log(`Created and Using ${databaseName} Database`);
+            return console.log(`Using ${databaseName} Database and tables ${tables[0].name} and ${tables[1].name}Created`);
         })
-    });
-};
+    })
+}
 
-// connection.end();
+
 module.exports = {
     runSQL,
-    createDatabase
 }
