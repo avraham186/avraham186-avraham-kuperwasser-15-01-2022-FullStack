@@ -7,6 +7,6 @@ const router = express.Router()
 router.get('/', getFavoriteCities)
 router.get('/is-favorite/:id',isFavorite)
 router.post('/', addFavoriteCity)
-router.delete('/:id', removeFavoriteCity)
+router.delete('/DeleteFavorite/:id', removeFavoriteCity)
 
 module.exports = router

@@ -6,21 +6,23 @@ function getFavoriteCities() {
 
     return DBService.runSQL(query)
         .then(cities => {
+            const cityToReturn = cities.map(city => {
+                return { Key: city.cityKey, LocalizedName: city.LocalizedName }
+            })
             return (cities.length !== 0
-                ? cities
-                : null)
-            // : Promise.reject(console.log('no city found'))
-            // )
+                ? cityToReturn
+                : null
+            )
         });
 }
 
 function getByCityKey(cityKey) {
-    const query = 'SELECT cityKey=? FROM favorite_cities';
+    console.log('city in get city', city);
+    const query = `SELECT * FROM favorite_cities WHERE cityKey=${cityKey}`;
     const varArr = [cityKey]
     return DBService.runSQL(query, varArr)
         .then(cities => {
-            const cityExists = Object.values(JSON.parse(JSON.stringify(cities[0])))[0]
-            return cityExists !== '0'
+            return cities.length !== '0'
                 ? cities[0]
                 : null
         })
@@ -38,12 +40,14 @@ function getByCityKey(cityKey) {
 // }
 
 function addToFavorites(city) {
-    const query = 'INSERT INTO favorite_cities (cityKey,localizedName) VALUES (?,?)'
-    const varArr = [city.cityKey, city.localizedName]
+    const query = 'INSERT INTO favorite_cities (cityKey,LocalizedName) VALUES (?,?)'
+    const varArr = [city.cityKey, city.name]
     return DBService.runSQL(query, varArr)
-        .then(okPacket => okPacket.affectedRows !== 0
-            ? okPacket
-            : Promise.reject(new Error('No city was added')));
+        .then(okPacket => {
+            return okPacket.affectedRows !== 0
+                ? okPacket
+                : console.log('No city was added')
+        });
 }
 // async function addToFavorites(city) {
 //     const query = `INSERT INTO favorite_cities
@@ -58,17 +62,18 @@ function addToFavorites(city) {
 function removeFavoriteCity(cityKey) {
     try {
         const city = getByCityKey(cityKey)
+        console.log('city', city);
         return city.then((city) => {
             if (!city) return 0
-            const query = 'DELETE FROM favorite_cities WHERE cityKey = ?';
+            const query = `DELETE FROM favorite_cities WHERE cityKey = ${cityKey}`;
             const varArr = [cityKey]
             return DBService.runSQL(query, varArr)
                 .then(okPacket => okPacket.affectedRows !== 0
                     ? okPacket
-                    : Promise.reject(`No city deleted - cityKey ${cityKey}`));
+                    : console.log(`No city deleted - cityKey ${cityKey}`));
         })
     } catch (err) {
-        console.log('No city deleted remove favorite city');
+        console.log('No city deleted remove favorite city',err);
     }
 }
 // function removeFavoriteCity(cityKey) {

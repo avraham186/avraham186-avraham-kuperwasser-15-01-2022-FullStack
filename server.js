@@ -25,7 +25,6 @@ const { createDatabase } = require('./services/DBService')
 app.use('/api/favorite', favoriteCityRoutes)
 app.get('/api/Search', searchAutoComplete)
 app.get('/api/GetCurrentWeather/:id', getCurrentWeather)
-app.delete('/api/favorite/DeleteFavorite', favoriteCityRoutes)
 
 console.log('I am Here!, am I??')
 

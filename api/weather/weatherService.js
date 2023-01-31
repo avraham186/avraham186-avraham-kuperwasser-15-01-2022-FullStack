@@ -5,19 +5,14 @@ const BASE_URL = 'http://dataservice.accuweather.com'
 
 
 function _getByCityKey(cityKey) {
-    const query = `SELECT id=? FROM cities `;
+    const query = `SELECT * FROM cities where id=${cityKey}`;
     const varArr = [cityKey]
     try {
         return DBService.runSQL(query, varArr)
             .then(cities => {
-                console.log('cities', cities);
-                if (cities.length !== 0) {
-                    const str = JSON.stringify(cities[0]);
-                    const cityExists = str[str.length - 2]
-                    return cityExists !== '0'
-                        ? cities[0]
-                        : null
-                }
+                return cities.length !== 0
+                    ? cities[0]
+                    : null
             })
     } catch (err) {
         console.log('error in getByCityKey', err);
@@ -42,13 +37,12 @@ function _getByCityKey(cityKey) {
 // }
 
 function _addCityToDB(city) {
-    console.log('city to add in addCityToDB', city)
     const query = 'INSERT INTO cities (id,weatherTxt,temp) VALUES (?,?,?)'
     const varArr = [city.id, city.weatherTxt, city.temp]
     return DBService.runSQL(query, varArr)
         .then(results => {
             results.affectedRows !== 0
-                ? Promise.resolve(console.log(`the city ${city.weatherTxt} was added`))
+                ? Promise.resolve(console.log(`the city ${city.id} was added`))
                 : Promise.reject(console.log('No city was added'))
         });
 }
@@ -88,22 +82,20 @@ function getCurrentWeather(cityKey) {
                 return (fetch(`${BASE_URL}/currentconditions/v1/${cityKey}?apikey=${API_KEY}&details=false`)
                     .then(city => city.json())
                     .then(city => {
-                        console.log('city in getCurrentWeather second then', city);
                         const cityToSave = {
                             id: cityKey,
                             weatherTxt: city[0].WeatherText,
                             temp: city[0].Temperature.Metric.Value
                         }
                         _addCityToDB(cityToSave)
-                        return city[0]
+                        return cityToSave
                     })
                     .then(city => {
-                        console.log('city in getCurrentWeather third then', city);
                         return Promise.resolve(city)
                     })
                 )
             } else {
-                Promise.resolve(city)
+                return Promise.resolve(city)
             }
         })
     } catch (err) {

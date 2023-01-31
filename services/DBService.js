@@ -27,22 +27,14 @@ connection.connect((err) => {
 })
 
 
-function runSQL(sqlCommand,varArr) {
+function runSQL(sqlCommand, varArr) {
     return new Promise((resolve, reject) => {
-        connection.execute(sqlCommand,varArr, function (error, results, fields) {
+        connection.execute(sqlCommand, varArr, function (error, results, fields) {
             if (error) reject(error);
             else resolve(results);
         });
     })
 }
-// function runSQL(sqlCommand) {
-//     return new Promise((resolve, reject) => {
-//         connection.query(sqlCommand, function (error, results, fields) {
-//             if (error) reject(error);
-//             else resolve(results);
-//         });
-//     })
-// }
 
 function createDataBase() {
     const databaseName = "weather_DB";
@@ -59,7 +51,7 @@ function createDataBase() {
 
             const tables = [
                 { name: 'cities', columns: ['id', 'weatherTxt', 'temp'] },
-                { name: 'favorite_cities', columns: ['cityKey', 'localizedName'] }
+                { name: 'favorite_cities', columns: ['cityKey', 'LocalizedName'] }
             ]
             tables.forEach((table) => {
                 if (table.name === 'cities') {
@@ -70,12 +62,13 @@ function createDataBase() {
                     )
                 } else {
                     connection.query(`CREATE TABLE ${table.name} (
-                        ${table.columns[0]} varchar(255),
-                        ${table.columns[1]} varchar(255))`
+                        ${table.columns[0]} varchar(255), 
+                        ${table.columns[1]} varchar(255),
+                        PRIMARY KEY (${table.columns[0]}))`
                     )
                 }
             })
-            return console.log(`Using ${databaseName} Database and tables ${tables[0].name} and ${tables[1].name}Created`);
+            return console.log(`Using ${databaseName} Database and tables ${tables[0].name} and ${tables[1].name} Created`);
         })
     })
 }
